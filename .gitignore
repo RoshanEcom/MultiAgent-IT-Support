@@ -1,5 +1,5 @@
-# Secrets
-.env
+# Local environment overrides (.env is intentionally tracked in this repo per
+# project owner; .env.local is for per-developer overrides and stays untracked)
 .env.local
 
 # Vector store
