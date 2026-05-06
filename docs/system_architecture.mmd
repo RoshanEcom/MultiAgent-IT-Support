@@ -1,0 +1,53 @@
+---
+config:
+  layout: fixed
+---
+flowchart TB
+ subgraph Channels["User Channels"]
+        UI["Streamlit Chat UI"]
+        CLI["CLI (python -m src.main)"]
+  end
+ subgraph Agents["Agent Nodes"]
+        IA["Intake Agent<br>(Classify request_type, system, severity)"]
+        KA["Knowledge Agent<br>(RAG over markdown runbooks)"]
+        WA["Workflow Agent<br>(Plan + execute MCP tool calls)"]
+        EA["Escalation Agent<br>(Diagnostic summary + Jira incident)"]
+  end
+ subgraph LangGraph["LangGraph Orchestration Layer"]
+        ORCH["LangGraph Runtime<br>(StateGraph, conditional edges)"]
+        Agents
+        STATE["GraphState<br>messages, intent, entities,<br>retrieved_docs, actions, trace"]
+  end
+ subgraph RAG["RAG Layer"]
+        KB["knowledge_base/*.md<br>(software, hardware, access,<br>email, printer, AV, onboarding)"]
+        SPLIT["RecursiveCharacterTextSplitter<br>(chunk_size=1000, overlap=200)"]
+        EMB["OpenAI Embeddings<br>(text-embedding-3-small)"]
+        CHR["Chroma Vector DB<br>(local, persistent)"]
+  end
+ subgraph MCP["MCP-style Tool Layer"]
+        REG["ToolRegistry + MCPClient<br>(uniform call interface)"]
+        JIRA["jira.create_ticket / create_incident<br>(real Atlassian REST API)"]
+        IDP["idp.provision_software / add_to_group<br>(mock)"]
+        CAT["catalog.lookup_hardware / place_order<br>(mock)"]
+        LOGS["logs.get_recent<br>(mock)"]
+  end
+    UI --> ORCH
+    CLI --> ORCH
+    ORCH <--> STATE
+    ORCH --> IA
+    IA --> ORCH
+    ORCH --> KA
+    KA --> EMB
+    EMB --> CHR
+    CHR --> KA
+    KB --> SPLIT
+    SPLIT --> EMB
+    KA --> ORCH
+    ORCH --> WA
+    WA --> REG
+    EA --> REG
+    REG --> JIRA & IDP & CAT & LOGS
+    WA --> ORCH
+    ORCH --> EA
+    EA --> ORCH
+    JIRA --> HUM["Human IT Engineer<br>(picks up escalated tickets)"]

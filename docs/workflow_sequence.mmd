@@ -1,0 +1,73 @@
+sequenceDiagram
+    autonumber
+
+    participant User
+    participant UI as Streamlit UI
+    participant ORCH as LangGraph Runtime
+    participant IA as Intake Agent
+    participant KA as Knowledge Agent (RAG)
+    participant WA as Workflow Agent (MCP)
+    participant EA as Escalation Agent
+    participant CHR as Chroma Vector DB
+    participant MCP as MCP Tool Registry
+    participant JIRA as Jira REST API
+    participant Human as Human IT
+
+    User->>UI: Sends request (e.g., "I need a Figma license" or "Conf Room B projector dead")
+    UI->>ORCH: invoke(GraphState with messages + user context)
+
+    %% Intake
+    ORCH->>IA: Classify
+    IA-->>ORCH: intent={request_type, category, system, severity, confidence}, entities
+
+    %% Branching on request_type
+    alt Informational query
+        ORCH->>KA: RAG retrieval + synthesis
+        KA->>CHR: similarity_search(question, k=5)
+        CHR-->>KA: top-k chunks with metadata
+        KA->>KA: LLM synthesizes answer with citations
+        alt Answer grounded in context
+            KA-->>ORCH: knowledge_answer + retrieved_docs
+            ORCH-->>UI: final_answer (with citations)
+        else "I don't know" sentinel
+            KA-->>ORCH: signal escalation
+            ORCH->>EA: Build summary + create Jira incident
+            EA->>MCP: jira.create_incident(...)
+            MCP->>JIRA: POST /rest/api/3/issue
+            JIRA-->>MCP: {key: "IT-123"}
+            EA-->>ORCH: escalation_ticket_id, summary
+            ORCH-->>UI: "Escalated to IT — Ticket IT-123"
+        end
+
+    else Action or incident
+        ORCH->>WA: plan + execute actions
+        loop for each planned action
+            WA->>MCP: tool call (idp.provision_software, catalog.place_order, logs.get_recent, ...)
+            MCP-->>WA: tool result (success | error)
+        end
+        WA->>MCP: jira.create_ticket (audit record)
+        MCP->>JIRA: POST /rest/api/3/issue
+        JIRA-->>MCP: {key: "IT-122"}
+
+        alt All actions succeeded
+            WA-->>ORCH: action summary + ticket_id
+            ORCH-->>UI: "Done. Tracking ticket IT-122"
+        else Any action failed OR severity=high
+            WA-->>ORCH: signal escalation with diagnostics
+            ORCH->>EA: Build summary + create Jira incident
+            EA->>MCP: jira.create_incident(...)
+            MCP->>JIRA: POST /rest/api/3/issue
+            JIRA-->>MCP: {key: "IT-124"}
+            EA-->>ORCH: escalation_ticket_id, summary
+            ORCH-->>UI: "Escalated to IT — Ticket IT-124"
+            JIRA-->>Human: ticket appears in queue with full agent trace
+        end
+
+    else Unclear / low confidence
+        ORCH->>EA: Direct escalation
+        EA->>MCP: jira.create_incident(...)
+        MCP->>JIRA: POST /rest/api/3/issue
+        JIRA-->>MCP: {key: "IT-125"}
+        EA-->>ORCH: escalation_ticket_id, summary
+        ORCH-->>UI: "I wasn't sure how to help — escalated to IT (IT-125)"
+    end

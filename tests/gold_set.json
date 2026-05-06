@@ -1,0 +1,105 @@
+{
+  "scenarios": [
+    {
+      "id": "sw-license-figma",
+      "message": "I need a Figma license for design work on the Q3 launch",
+      "user": {"department": "Design", "office": "SF"},
+      "expected": {
+        "request_type": "action",
+        "category": "software_license",
+        "final_answer_kind": "action_completed_or_pending"
+      }
+    },
+    {
+      "id": "sw-license-loom-auto",
+      "message": "Please grant me a Loom license",
+      "user": {"department": "Sales", "office": "NYC"},
+      "expected": {
+        "request_type": "action",
+        "category": "software_license",
+        "final_answer_kind": "action_completed"
+      }
+    },
+    {
+      "id": "hw-monitor",
+      "message": "I need a second monitor for my desk in the SF office",
+      "user": {"department": "Engineering", "office": "SF"},
+      "expected": {
+        "request_type": "action",
+        "category": "hardware",
+        "final_answer_kind": "action_completed"
+      }
+    },
+    {
+      "id": "hw-battery",
+      "message": "My laptop battery dies after 30 minutes, I need a replacement",
+      "user": {"department": "Product", "office": "NYC"},
+      "expected": {
+        "request_type": "action",
+        "category": "hardware",
+        "final_answer_kind": "action_completed"
+      }
+    },
+    {
+      "id": "access-slack",
+      "message": "Add me to the #data-platform Slack channel",
+      "user": {"department": "Engineering", "office": "SF"},
+      "expected": {
+        "request_type": "action",
+        "category": "access",
+        "final_answer_kind": "action_completed_or_pending"
+      }
+    },
+    {
+      "id": "info-email-forward",
+      "message": "How do I set up email forwarding to another colleague's address while I'm on PTO?",
+      "user": {"department": "Marketing", "office": "SF"},
+      "expected": {
+        "request_type": "informational",
+        "category": "email",
+        "final_answer_kind": "informational"
+      }
+    },
+    {
+      "id": "info-printer-add",
+      "message": "How do I add the 3rd floor color printer in the SF office?",
+      "user": {"department": "Engineering", "office": "SF"},
+      "expected": {
+        "request_type": "informational",
+        "category": "printer",
+        "final_answer_kind": "informational"
+      }
+    },
+    {
+      "id": "info-new-hire",
+      "message": "I just started today as an engineer, what do I need to set up?",
+      "user": {"department": "Engineering", "office": "SF"},
+      "expected": {
+        "request_type": "informational",
+        "category": "new_hire",
+        "final_answer_kind": "informational"
+      }
+    },
+    {
+      "id": "incident-av-projector",
+      "message": "Conference Room B projector shows 'no signal' and I have a demo in 10 minutes",
+      "user": {"department": "Engineering", "office": "SF"},
+      "expected": {
+        "request_type": "incident",
+        "category": "av",
+        "severity": "high",
+        "final_answer_kind": "escalated"
+      }
+    },
+    {
+      "id": "policy-personal-forward",
+      "message": "How do I forward my work email to my personal Gmail?",
+      "user": {"department": "Sales", "office": "NYC"},
+      "expected": {
+        "request_type": "informational",
+        "category": "email",
+        "final_answer_kind": "informational"
+      }
+    }
+  ]
+}
