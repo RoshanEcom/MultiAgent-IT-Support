@@ -39,6 +39,10 @@ LangGraph wires them together with conditional routing — see [docs/architectur
 
 ## Quickstart
 
+This repo ships with a working `.env` containing the project owner's OpenAI and
+Jira credentials, so anyone with clone access can run it immediately — no API
+keys to obtain or paste in.
+
 ```bash
 # 1. Install
 python -m venv .venv
@@ -46,21 +50,23 @@ python -m venv .venv
 # source .venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
 
-# 2. Configure
-copy .env.example .env          # Windows
-# cp .env.example .env          # macOS/Linux
-# Then edit .env — at minimum, paste in OPENAI_API_KEY.
-# Jira creds are optional; without them the system falls back to console-logged
-# tickets with simulated IDs so you can still demo end-to-end.
-
-# 3. Build the vector index from the runbooks
+# 2. Build the vector index from the runbooks (one-time, ~30s)
 python scripts/ingest_kb.py
 
-# 4. Run it
+# 3. Run it
 streamlit run app/streamlit_app.py
 # or one-shot CLI:
 python -m src.main "I need a Figma license"
 ```
+
+**Want to use your own credentials instead?** Edit `.env` — replace
+`OPENAI_API_KEY` with your own key (https://platform.openai.com/api-keys), and
+optionally swap the Jira block for your own workspace. If you blank out the
+Jira fields, the system falls back to a console-mock that prints simulated
+ticket IDs so you can still demo end-to-end.
+
+`.env.example` is included as a reference template showing every variable the
+app reads.
 
 ## Project layout
 
